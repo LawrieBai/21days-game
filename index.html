@@ -1891,21 +1891,40 @@
         ];
 
           try {
-          // 通过同端口代理中转AI请求（无需额外启动代理服务器）
-          const proxyUrl = '/ai/chat';
-          const requestBody = {
-            provider: AI_CONFIG.provider,
-            apiKey: AI_CONFIG.apiKey,
-            model: AI_CONFIG.model,
-            messages: messages
-          };
-
-          console.log('AI代理请求:', AI_CONFIG.provider, '模型:', AI_CONFIG.model);
+          // 检测运行环境，使用合适的API端点
+          const isLocalServer = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
           
-          const response = await fetch(proxyUrl, {
+          let apiUrl, requestBody;
+          
+          if (isLocalServer) {
+            // 本地服务器模式：使用本地代理
+            apiUrl = '/ai/chat';
+            requestBody = {
+              provider: AI_CONFIG.provider,
+              apiKey: AI_CONFIG.apiKey,
+              model: AI_CONFIG.model,
+              messages: messages
+            };
+          } else {
+            // GitHub Pages或其他外部托管：使用CORS代理
+            apiUrl = 'https://corsproxy.io/?' + encodeURIComponent('https://ark.cn-beijing.volces.com/api/v3/chat/completions');
+            requestBody = {
+              model: AI_CONFIG.model,
+              messages: messages,
+              temperature: 0.8,
+              max_tokens: 150
+            };
+          }
+
+          console.log('AI请求模式:', isLocalServer ? '本地代理' : 'CORS代理');
+          
+          const response = await fetch(apiUrl, {
             method: 'POST',
-            headers: {
+            headers: isLocalServer ? {
               'Content-Type': 'application/json'
+            } : {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + AI_CONFIG.apiKey
             },
             body: JSON.stringify(requestBody)
           });
