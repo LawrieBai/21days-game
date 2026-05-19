@@ -1906,8 +1906,8 @@
               messages: messages
             };
           } else {
-            // GitHub Pages或其他外部托管：使用CORS代理
-            apiUrl = 'https://corsproxy.io/?' + encodeURIComponent('https://ark.cn-beijing.volces.com/api/v3/chat/completions');
+            // GitHub Pages或其他外部托管：使用allorigins代理
+            apiUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://ark.cn-beijing.volces.com/api/v3/chat/completions');
             requestBody = {
               model: AI_CONFIG.model,
               messages: messages,
